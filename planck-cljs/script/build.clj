@@ -39,7 +39,8 @@
     (slurp (io/resource filename))))
 
 (copy-source "cljs/test.cljc")
-(copy-source "cljs/spec.clj")
+(copy-source "cljs/spec.cljc")
+(copy-source "cljs/spec/impl/gen.cljc")
 (copy-source "cljs/analyzer/api.cljc")
 (copy-source "clojure/template.clj")
 
