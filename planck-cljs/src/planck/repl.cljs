@@ -916,13 +916,19 @@
         (when-let [fn-sym (lookup-sym demunge-maps (str ns "$" fn))]
           (str fn-sym " [" prot-sym "]"))))))
 
+(defn- gensym?
+  [sym]
+  (s/starts-with? (name sym) "G__"))
+
 (defn- demunge-sym
   [munged-sym]
   (let [demunge-maps (cons @core-demunge-map (non-core-demunge-maps))]
     (str (or (lookup-sym demunge-maps munged-sym)
              (demunge-protocol-fn demunge-maps munged-sym)
              (demunge-local demunge-maps munged-sym)
-           munged-sym))))
+             (if (gensym? munged-sym)
+               munged-sym
+               (demunge munged-sym))))))
 
 (defn- mapped-stacktrace-str
   ([stacktrace sms]
