@@ -160,7 +160,9 @@
 (defn- load-core-analysis-caches
   [eager]
   (load-core-analysis-cache eager 'cljs.core "cljs/core.cljs.cache.aot.")
-  (load-core-analysis-cache eager 'cljs.core$macros "cljs/core$macros.cljc.cache."))
+  (load-core-analysis-cache eager 'cljs.core$macros "cljs/core$macros.cljc.cache.")
+  (load-core-analysis-cache eager 'cljs.spec "cljs/spec.cljs.cache.aot.")
+  (load-core-analysis-cache eager 'cljs.spec$macros "cljs/spec$macros.cljc.cache."))
 
 (defonce ^:private app-env (atom nil))
 
