@@ -25,6 +25,8 @@ cd ..
 rm -f planck-cljs/out/planck/*macros*
 rm -f planck-cljs/out/clojure/template*macros*
 rm -f planck-cljs/out/cljs/test*macros*
+rm -f planck-cljs/out/cljs/spec*macros*
+rm -f planck-cljs/out/cljs/spec/impl/gen*macros*
 rm -f planck-cljs/out/planck/from/io/aviso/*macros*
 
 echo "### Bundling 1st Stage ClojureScript"
