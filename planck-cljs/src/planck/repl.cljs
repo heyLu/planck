@@ -458,7 +458,7 @@
 (defn- ^:export get-completions
   [buffer]
   (let [top-form?            (re-find #"^\s*\(\s*[^()\s]*$" buffer)
-        typed-ns             (second (re-find #"\(+(\b[a-zA-Z-.]+)/[a-zA-Z-]+$" buffer))]
+        typed-ns             (second (re-find #"\(*(\b[a-zA-Z-.]+)/[a-zA-Z-]+$" buffer))]
     (let [buffer-match-suffix (re-find #":?[a-zA-Z-\.]*$" buffer)
           buffer-prefix       (subs buffer 0 (- (count buffer) (count buffer-match-suffix)))]
       (clj->js (if (= "" buffer-match-suffix)
