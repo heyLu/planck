@@ -92,6 +92,10 @@
     (apply str (drop-last 7 ns-name))
     ns-name))
 
+(defn- add-macros-suffix
+  [sym]
+  (symbol (str (name sym) "$macros")))
+
 (defn- get-namespace
   "Gets the AST for a given namespace."
   [ns]
@@ -430,7 +434,10 @@
 (defn- completion-candidates
   [top-form? typed-ns]
   (set (if typed-ns
-         (completion-candidates-for-ns (expand-typed-ns (symbol typed-ns)) false)
+         (let [expanded-ns (expand-typed-ns (symbol typed-ns))]
+           (concat
+             (completion-candidates-for-ns expanded-ns false)
+             (completion-candidates-for-ns (add-macros-suffix expanded-ns) false)))
          (concat
            (map str keyword-completions)
            (map #(drop-macros-suffix (str %)) (all-ns))
@@ -1106,7 +1113,7 @@
   (run! prn
     (distinct (sort (concat
                       (public-syms nsname)
-                      (public-syms (symbol (str (name nsname) "$macros"))))))))
+                      (public-syms (add-macros-suffix nsname)))))))
 
 (defn- apropos*
   [str-or-pattern]
