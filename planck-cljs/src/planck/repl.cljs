@@ -117,7 +117,9 @@
   "Returns a sequence of the public symbols in a namespace."
   [ns]
   {:pre [(symbol? ns)]}
-  (ns-syms ns (comp not :private second)))
+  (ns-syms ns (fn [[_ attrs]]
+                (and (not (:private attrs))
+                     (not (:anonymous attrs))))))
 
 (defn- get-aenv
   []
@@ -399,9 +401,12 @@
 (defn- completion-candidates-for-ns
   [ns-sym allow-private?]
   (map (comp str key)
-    (filter (if allow-private?
-              identity
-              #(not (:private (:meta (val %)))))
+    (into []
+      (comp
+        (filter (if allow-private?
+                  identity
+                  #(not (:private (val %)))))
+        (remove #(:anonymous (val %))))
       (apply merge
         ((juxt :defs :macros)
           (get-namespace ns-sym))))))
