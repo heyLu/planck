@@ -168,6 +168,13 @@
   (load-core-analysis-cache eager 'cljs.core "cljs/core.cljs.cache.aot.")
   (load-core-analysis-cache eager 'cljs.core$macros "cljs/core$macros.cljc.cache."))
 
+(defn- prime-analysis-cache-for-implicit-macro-loading
+  "Supports priming analysis cache in order to work around 
+  http://dev.clojure.org/jira/browse/CLJS-1657 for commonly used
+  namespaces that we cannot AOT compile."
+  [ns-sym]
+  (swap! st assoc-in [::ana/namespaces ns-sym :require-macros] {ns-sym ns-sym}))
+
 (defonce ^:private app-env (atom nil))
 
 (defn- read-opts-from-file
@@ -181,6 +188,7 @@
 (defn- ^:export init
   [repl verbose cache-path static-fns]
   (load-core-analysis-caches repl)
+  (prime-analysis-cache-for-implicit-macro-loading 'cljs.spec.test)
   (let [opts (or (read-opts-from-file "opts.clj")
                  {})]
     (reset! planck.repl/app-env (merge {:repl       repl
