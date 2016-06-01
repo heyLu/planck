@@ -23,7 +23,7 @@
        (when-let [s (cljs.analyzer/error-message warning-type extra)]
          (binding [*out* *err*]
            (println "WARNING:" (cljs.analyzer/message env s)))
-         (System/exit 1))))]
+         #_(System/exit 1))))]
   (api/build (api/inputs "src")
     {:output-dir         "out"
      :output-to          "out/main.js"
