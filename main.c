@@ -165,7 +165,7 @@ JSValueRef function_cache(JSContextRef ctx, JSObjectRef function, JSObjectRef th
 				|| JSValueGetType (ctx, args[2]) == kJSTypeNull) &&
 			(JSValueGetType (ctx, args[3]) == kJSTypeString
 				|| JSValueGetType (ctx, args[3]) == kJSTypeNull)) {
-		debug_print_value("cache", ctx, args[0]);
+		// debug_print_value("cache", ctx, args[0]);
 
 		char *cache_prefix = value_to_c_string(ctx, args[0]);
 		char *source = value_to_c_string(ctx, args[1]);
