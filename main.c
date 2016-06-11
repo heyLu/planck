@@ -405,7 +405,7 @@ int main(int argc, char **argv) {
 
 	JSGlobalContextRef ctx = JSGlobalContextCreate(NULL);
 
-	JSStringRef nameRef = JSStringCreateWithUTF8CString("jsc-test");
+	JSStringRef nameRef = JSStringCreateWithUTF8CString("ton");
 	JSGlobalContextSetName(ctx, nameRef);
 
 	JSObjectRef global_obj = JSContextGetGlobalObject(ctx);
