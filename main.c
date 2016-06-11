@@ -142,7 +142,7 @@ JSValueRef function_load(JSContextRef ctx, JSObjectRef function, JSObjectRef thi
 			free(contents);
 
 			JSValueRef res[2];
-			res[0] = JSValueMakeString(ctx, contents_str);;
+			res[0] = JSValueMakeString(ctx, contents_str);
 			res[1] = JSValueMakeNumber(ctx, last_modified);
 			return JSObjectMakeArray(ctx, 2, res, NULL);
 		}
