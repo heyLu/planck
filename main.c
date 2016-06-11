@@ -470,6 +470,17 @@ int main(int argc, char **argv) {
 	}
 
 	if (repl) {
+		char *home = getenv("HOME");
+		char *history_path = NULL;
+		if (home != NULL) {
+			char history_name[] = ".ton_history";
+			int len = strlen(home) + strlen(history_name) + 2;
+			history_path = malloc(len * sizeof(char));
+			snprintf(history_path, len, "%s/%s", home, history_name);
+
+			linenoiseHistoryLoad(history_path);
+		}
+
 		char *prompt = javascript ? " > " : " => ";
 
 		char *line;
@@ -481,6 +492,9 @@ int main(int argc, char **argv) {
 				evaluate_source(ctx, "text", line, true, true, "cljs.user", theme);
 			}
 			linenoiseHistoryAdd(line);
+			if (history_path != NULL) {
+				linenoiseHistorySave(history_path);
+			}
 			free(line);
 		}
 	}
