@@ -457,7 +457,7 @@ int main(int argc, char **argv) {
 	}
 
 	if (repl) {
-		evaluate_source(ctx, "text", "(require '[planck.repl :refer-macros [apropos dir find-doc doc source pst]])", true, true, "cljs.user", "dumb");
+		evaluate_source(ctx, "text", "(require '[planck.repl :refer-macros [apropos dir find-doc doc source pst]])", true, false, "cljs.user", "dumb");
 	}
 
 	evaluate_script(ctx, "goog.provide('cljs.user');", "<init>");
@@ -466,7 +466,7 @@ int main(int argc, char **argv) {
 	evaluate_script(ctx, "cljs.core._STAR_assert_STAR_ = true;", "<init>");
 
 	for (int i = 0; i < num_eval_args; i++) {
-		evaluate_source(ctx, "text", eval_args[i], true, true, "cljs.user", "dumb");
+		evaluate_source(ctx, "text", eval_args[i], true, false, "cljs.user", "dumb");
 	}
 
 	if (repl) {
