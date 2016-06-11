@@ -26,7 +26,7 @@ JSValueRef evaluate_script(JSContextRef ctx, char *script, char *source);
 
 char *value_to_c_string(JSContextRef ctx, JSValueRef val);
 
-JSValueRef evaluate_source(JSContextRef ctx, char *type, char *source_value, bool expression, char *set_ns);
+JSValueRef evaluate_source(JSContextRef ctx, char *type, char *source_value, bool expression, bool print_nil, char *set_ns, char *theme);
 char *munge(char *s);
 
 void bootstrap(JSContextRef ctx, char *deps_file_path, char *goog_base_path);
@@ -323,6 +323,7 @@ void usage(char *program_name) {
 		"  -k, --cache      The directory to cache compiler results in\n"
 		"  -j, --javascript Whether to run a JavaScript REPL\n"
 		"  -e, --eval       Evaluate the given expression\n"
+		"  -t, --theme      The theme to use (dumb, light, dark)\n"
 	);
 }
 
@@ -330,6 +331,7 @@ bool verbose = false;
 bool repl = false;
 bool static_fns = false;
 char *cache_path = NULL;
+char *theme = "light";
 
 bool javascript = false;
 
@@ -345,11 +347,12 @@ int main(int argc, char **argv) {
 		{"cache", required_argument, NULL, 'k'},
 		{"javascript", no_argument, NULL, 'j'},
 		{"eval", required_argument, NULL, 'e'},
+		{"theme", required_argument, NULL, 't'},
 
 		{0, 0, 0, 0}
 	};
 	int opt, option_index;
-	while ((opt = getopt_long(argc, argv, "hvrsk:je:", long_options, &option_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hvrsk:je:t:", long_options, &option_index)) != -1) {
 		switch (opt) {
 		case 'h':
 			usage(argv[0]);
@@ -373,6 +376,9 @@ int main(int argc, char **argv) {
 			num_eval_args += 1;
 			eval_args = realloc(eval_args, num_eval_args * sizeof(char*));
 			eval_args[num_eval_args - 1] = argv[optind - 1];
+			break;
+		case 't':
+			theme = argv[optind - 1];
 			break;
 		case '?':
 			usage(argv[0]);
@@ -451,7 +457,7 @@ int main(int argc, char **argv) {
 	}
 
 	if (repl) {
-		evaluate_source(ctx, "text", "(require '[planck.repl :refer-macros [apropos dir find-doc doc source pst]])", true, "cljs.user");
+		evaluate_source(ctx, "text", "(require '[planck.repl :refer-macros [apropos dir find-doc doc source pst]])", true, true, "cljs.user", "dumb");
 	}
 
 	evaluate_script(ctx, "goog.provide('cljs.user');", "<init>");
@@ -460,7 +466,7 @@ int main(int argc, char **argv) {
 	evaluate_script(ctx, "cljs.core._STAR_assert_STAR_ = true;", "<init>");
 
 	for (int i = 0; i < num_eval_args; i++) {
-		evaluate_source(ctx, "text", eval_args[i], true, "cljs.user");
+		evaluate_source(ctx, "text", eval_args[i], true, true, "cljs.user", "dumb");
 	}
 
 	if (repl) {
@@ -472,7 +478,7 @@ int main(int argc, char **argv) {
 				JSValueRef res = evaluate_script(ctx, line, "<stdin>");
 				print_value("", ctx, res);
 			} else {
-				evaluate_source(ctx, "text", line, true, "cljs.user");
+				evaluate_source(ctx, "text", line, true, true, "cljs.user", theme);
 			}
 			free(line);
 		}
@@ -573,7 +579,7 @@ JSObjectRef get_function(JSContextRef ctx, char *namespace, char *name) {
 	return JSValueToObject(ctx, val, NULL);
 }
 
-JSValueRef evaluate_source(JSContextRef ctx, char *type, char *source, bool expression, char *set_ns) {
+JSValueRef evaluate_source(JSContextRef ctx, char *type, char *source, bool expression, bool print_nil, char *set_ns, char *theme) {
 	JSValueRef args[6];
 	int num_args = 6;
 
@@ -587,10 +593,10 @@ JSValueRef evaluate_source(JSContextRef ctx, char *type, char *source, bool expr
 	}
 
 	args[1] = JSValueMakeBoolean(ctx, expression);
-	args[2] = JSValueMakeBoolean(ctx, true); // print-nil-expression
+	args[2] = JSValueMakeBoolean(ctx, print_nil);
 	JSStringRef set_ns_str = JSStringCreateWithUTF8CString(set_ns);
 	args[3] = JSValueMakeString(ctx, set_ns_str);
-	JSStringRef theme_str = JSStringCreateWithUTF8CString("light");
+	JSStringRef theme_str = JSStringCreateWithUTF8CString(theme);
 	args[4] = JSValueMakeString(ctx, theme_str);
 	args[5] = JSValueMakeNumber(ctx, 0);
 
