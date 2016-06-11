@@ -480,6 +480,7 @@ int main(int argc, char **argv) {
 			} else {
 				evaluate_source(ctx, "text", line, true, true, "cljs.user", theme);
 			}
+			linenoiseHistoryAdd(line);
 			free(line);
 		}
 	}
