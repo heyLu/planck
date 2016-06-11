@@ -1,4 +1,5 @@
 /ton
+/*.o
 /.planck_cache
 /out
 /jsc-funcs
