@@ -461,15 +461,13 @@ int main(int argc, char **argv) {
 
 		char *line;
 		while ((line = linenoise(prompt)) != NULL) {
-			JSValueRef res = NULL;
 			if (javascript) {
-				res = evaluate_script(ctx, line, "<stdin>");
+				JSValueRef res = evaluate_script(ctx, line, "<stdin>");
+				print_value("", ctx, res);
 			} else {
-				res = evaluate_source(ctx, "text", line, true, "cljs.user");
+				evaluate_source(ctx, "text", line, true, "cljs.user");
 			}
 			free(line);
-
-			print_value("", ctx, res);
 		}
 	}
 
