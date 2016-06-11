@@ -574,8 +574,8 @@ JSObjectRef get_function(JSContextRef ctx, char *namespace, char *name) {
 }
 
 JSValueRef evaluate_source(JSContextRef ctx, char *type, char *source, bool expression, char *set_ns) {
-	JSValueRef args[7];
-	int num_args = 7;
+	JSValueRef args[6];
+	int num_args = 6;
 
 	{
 		JSValueRef source_args[2];
@@ -587,13 +587,12 @@ JSValueRef evaluate_source(JSContextRef ctx, char *type, char *source, bool expr
 	}
 
 	args[1] = JSValueMakeBoolean(ctx, expression);
-	args[2] = JSValueMakeBoolean(ctx, false);
-	args[3] = JSValueMakeBoolean(ctx, false);
+	args[2] = JSValueMakeBoolean(ctx, true); // print-nil-expression
 	JSStringRef set_ns_str = JSStringCreateWithUTF8CString(set_ns);
-	args[4] = JSValueMakeString(ctx, set_ns_str);
-	JSStringRef theme_str = JSStringCreateWithUTF8CString("dumb");
-	args[5] = JSValueMakeString(ctx, theme_str);
-	args[6] = JSValueMakeNumber(ctx, 0);
+	args[3] = JSValueMakeString(ctx, set_ns_str);
+	JSStringRef theme_str = JSStringCreateWithUTF8CString("light");
+	args[4] = JSValueMakeString(ctx, theme_str);
+	args[5] = JSValueMakeNumber(ctx, 0);
 
 	JSObjectRef execute_fn = get_function(ctx, "planck.repl", "execute");
 	JSObjectRef global_obj = JSContextGetGlobalObject(ctx);
