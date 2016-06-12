@@ -22,7 +22,7 @@ bundle-test:
 	$(CC) -g -lz -DBUNDLE_TEST bundle.c -o $@
 
 zip-test:
-	$(CC) $(LIBFLAGS) -DZIP_TEST zip.c -o $@
+	$(CC) $(shell pkg-config --cflags --libs libzip) -DZIP_TEST zip.c -o $@
 
 clean:
 	rm -f ton $(OBJECTS)
