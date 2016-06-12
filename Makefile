@@ -5,7 +5,7 @@ VERSION = $(shell git describe --tags)
 CC = clang
 
 DEPS = javascriptcoregtk-4.0 libzip
-CFLAGS = -Wall $(shell pkg-config --cflags $(DEPS)) -DDEBUG
+CFLAGS = -Wall $(shell pkg-config --cflags $(DEPS)) -DDEBUG $(EXTRA_CFLAGS)
 LIBFLAGS = $(shell pkg-config --libs $(DEPS))
 
 SOURCES = $(sort $(wildcard *.c) linenoise.c)
