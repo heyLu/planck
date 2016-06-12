@@ -401,6 +401,7 @@ void usage(char *program_name) {
 		"  -j, --javascript Whether to run a JavaScript REPL\n"
 		"  -e, --eval       Evaluate the given expression\n"
 		"  -t, --theme      The theme to use (dumb, light, dark)\n"
+		"  -i, --init       Evaluate the file at path\n"
 	);
 }
 
@@ -412,10 +413,15 @@ char *theme = "light";
 
 bool javascript = false;
 
-int main(int argc, char **argv) {
-	int num_eval_args = 0;
-	char **eval_args = NULL;
+struct script {
+	char *type;
+	bool expression;
+	char *source;
+};
+struct script *scripts = NULL;
+int num_scripts = 0;
 
+int main(int argc, char **argv) {
 	struct option long_options[] = {
 		{"help", no_argument, NULL, 'h'},
 		{"verbose", no_argument, NULL, 'v'},
@@ -428,11 +434,12 @@ int main(int argc, char **argv) {
 		{"classpath", required_argument, NULL, 'c'},
 		{"out", required_argument, NULL, 'o'},
 		{"auto-cache", no_argument, NULL, 'K'},
+		{"init", required_argument, NULL, 'i'},
 
 		{0, 0, 0, 0}
 	};
 	int opt, option_index;
-	while ((opt = getopt_long(argc, argv, "hvrsk:je:t:c:o:K", long_options, &option_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hvrsk:je:t:c:o:Ki:", long_options, &option_index)) != -1) {
 		switch (opt) {
 		case 'h':
 			usage(argv[0]);
@@ -464,9 +471,18 @@ int main(int argc, char **argv) {
 			javascript = true;
 			break;
 		case 'e':
-			num_eval_args += 1;
-			eval_args = realloc(eval_args, num_eval_args * sizeof(char*));
-			eval_args[num_eval_args - 1] = argv[optind - 1];
+			num_scripts += 1;
+			scripts = realloc(scripts, num_scripts * sizeof(struct script));
+			scripts[num_scripts - 1].type = "text";
+			scripts[num_scripts - 1].expression = true;
+			scripts[num_scripts - 1].source = argv[optind - 1];
+			break;
+		case 'i':
+			num_scripts += 1;
+			scripts = realloc(scripts, num_scripts * sizeof(struct script));
+			scripts[num_scripts - 1].type = "path";
+			scripts[num_scripts - 1].expression = false;
+			scripts[num_scripts - 1].source = argv[optind - 1];
 			break;
 		case 't':
 			theme = argv[optind - 1];
@@ -513,7 +529,7 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	if (num_rest_args == 0 && num_eval_args == 0) {
+	if (num_rest_args == 0 && num_scripts == 0) {
 		repl = true;
 	}
 
@@ -581,8 +597,8 @@ int main(int argc, char **argv) {
 
 	evaluate_script(ctx, "cljs.core._STAR_assert_STAR_ = true;", "<init>");
 
-	for (int i = 0; i < num_eval_args; i++) {
-		evaluate_source(ctx, "text", eval_args[i], true, false, "cljs.user", "dumb");
+	for (int i = 0; i < num_scripts; i++) {
+		evaluate_source(ctx, scripts[i].type, scripts[i].source, scripts[i].expression, false, NULL, theme);
 	}
 
 	if (repl) {
