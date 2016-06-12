@@ -1,4 +1,4 @@
-.PHONY: zip-test clean
+.PHONY: bundle-test zip-test clean
 
 CC = clang
 
@@ -17,6 +17,9 @@ linenoise.c: linenoise.h
 
 linenoise.h:
 	curl -LsSfo $@ https://github.com/antirez/linenoise/raw/master/linenoise.h
+
+bundle-test:
+	$(CC) -g -lz -DBUNDLE_TEST bundle.c -o $@
 
 zip-test:
 	$(CC) $(LIBFLAGS) -DZIP_TEST zip.c -o $@
