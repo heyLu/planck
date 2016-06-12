@@ -2,6 +2,7 @@
 /bundle-test
 /zip-test
 /*.o
+/*.tar.gz
 
 /.planck_cache
 /out

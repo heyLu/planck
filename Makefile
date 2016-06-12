@@ -1,4 +1,6 @@
-.PHONY: bundle-test zip-test planck clean
+.PHONY: build bundle-and-build release bundle-test zip-test planck clean
+
+VERSION = $(shell git describe --tags)
 
 CC = clang
 
@@ -15,6 +17,14 @@ build: ton
 # Bundle cljs dependencies and build with that
 bundle-and-build: planck
 	cd planck; ./script/build-c
+
+# Build release tarball
+release:
+	git archive --prefix=ton-$(VERSION)/ --output=ton-$(VERSION).tar HEAD
+	# add bundle.c (with deps) and linenoise
+	tar -uf ton-$(VERSION).tar --transform='s/^/ton-$(VERSION)\//' bundle.c linenoise.c linenoise.h
+	gzip --force ton-$(VERSION).tar
+
 
 ton: $(OBJECTS)
 	$(CC) $(LIBFLAGS) $(OBJECTS) -o $@
