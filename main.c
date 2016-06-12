@@ -15,6 +15,7 @@
 
 #include "linenoise.h"
 
+#include "bundle.h"
 #include "zip.h"
 
 #define CONSOLE_LOG_BUF_SIZE 1000
@@ -142,7 +143,10 @@ JSValueRef function_load(JSContextRef ctx, JSObjectRef function, JSObjectRef thi
 		                   strcmp(src_paths[0].type, "src") == 0 &&
 		                   str_has_suffix(src_paths[0].path, "/planck-cljs/src/") == 0);
 
-		// if (!developing) { load from bundle }
+		if (!developing) {
+			contents = bundle_get_contents(path);
+			last_modified = 0;
+		}
 
 		// load from classpath
 		if (contents == NULL) {
@@ -171,7 +175,10 @@ JSValueRef function_load(JSContextRef ctx, JSObjectRef function, JSObjectRef thi
 			free(full_path);
 		}
 
-		// if (developing) { try from bundle as last-ditch effort }
+		if (developing && contents == NULL) {
+			contents = bundle_get_contents(path);
+			last_modified = 0;
+		}
 
 		if (contents != NULL) {
 			JSStringRef contents_str = JSStringCreateWithUTF8CString(contents);
