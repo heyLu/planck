@@ -196,9 +196,34 @@ JSValueRef function_load(JSContextRef ctx, JSObjectRef function, JSObjectRef thi
 
 JSValueRef function_load_deps_cljs_files(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
 		size_t argc, const JSValueRef args[], JSValueRef* exception) {
-	// TODO: not implemented
-	fprintf(stderr, "WARN: %s: stub\n", __func__);
-	return JSObjectMakeArray(ctx, 0, NULL, NULL);
+	int num_files = 0;
+	char **deps_cljs_files = NULL;
+
+	if (argc == 0) {
+		for (int i = 0; i < num_src_paths; i++) {
+			char *type = src_paths[i].type;
+			char *location = src_paths[i].path;
+
+			if (strcmp(type, "jar") == 0) {
+				char *source = get_contents_zip(location, "deps.cljs", NULL);
+				if (source != NULL) {
+					num_files += 1;
+					deps_cljs_files = realloc(deps_cljs_files, num_files * sizeof(char*));
+					deps_cljs_files[num_files - 1] = source;
+				}
+			}
+		}
+	}
+
+	JSValueRef files[num_files];
+	for (int i = 0; i < num_files; i++) {
+		JSStringRef file = JSStringCreateWithUTF8CString(deps_cljs_files[i]);
+		files[i] = JSValueMakeString(ctx, file);
+		free(deps_cljs_files[i]);
+	}
+	free(deps_cljs_files);
+
+	return JSObjectMakeArray(ctx, num_files, files, NULL);
 }
 
 JSValueRef function_cache(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
