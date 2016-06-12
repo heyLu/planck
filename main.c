@@ -585,7 +585,10 @@ JSValueRef get_value(JSContextRef ctx, char *namespace, char *name) {
 	}
 	//free(ns_tmp);
 
-	return get_value_on_object(ctx, JSValueToObject(ctx, ns_val, NULL), name);
+	char *munged_name = munge(name);
+	JSValueRef val = get_value_on_object(ctx, JSValueToObject(ctx, ns_val, NULL), munged_name);
+	free(munged_name);
+	return val;
 }
 
 JSObjectRef get_function(JSContextRef ctx, char *namespace, char *name) {
