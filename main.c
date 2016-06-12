@@ -378,10 +378,6 @@ JSValueRef function_import_script(JSContextRef ctx, JSObjectRef function, JSObje
 	}
 
 	return JSValueMakeUndefined(ctx);
-
-err:
-	// TODO: Fill exception with error from errno
-	return JSValueMakeUndefined(ctx);
 }
 
 void register_global_function(JSContextRef ctx, char *name, JSObjectCallAsFunctionCallback handler) {
@@ -513,8 +509,6 @@ int main(int argc, char **argv) {
 
 	JSStringRef nameRef = JSStringCreateWithUTF8CString("ton");
 	JSGlobalContextSetName(ctx, nameRef);
-
-	JSObjectRef global_obj = JSContextGetGlobalObject(ctx);
 
 	evaluate_script(ctx, "var global = this;", "<init>");
 
@@ -674,7 +668,6 @@ JSValueRef get_value(JSContextRef ctx, char *namespace, char *name) {
 	// printf("get_value: '%s'\n", namespace);
 	int len = strlen(namespace) + 1;
 	char *ns_tmp = malloc(len * sizeof(char));
-	char **ns_tmp_start = &ns_tmp;
 	strncpy(ns_tmp, namespace, len);
 	char *ns_part = strtok(ns_tmp, ".");
 	ns_tmp = NULL;

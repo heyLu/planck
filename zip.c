@@ -46,7 +46,6 @@ char *get_contents_zip(char *path, char *name, time_t *last_modified) {
 
 free_buf:
 	free(buf);
-close_file:
 	zip_fclose(f);
 close_archive:
 	zip_close(archive);
