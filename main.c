@@ -28,6 +28,7 @@ struct src_path {
 };
 struct src_path *src_paths = NULL;
 int num_src_paths = 0;
+char *out_path = NULL;
 
 JSStringRef to_string(JSContextRef ctx, JSValueRef val);
 JSValueRef evaluate_script(JSContextRef ctx, char *script, char *source);
@@ -45,6 +46,7 @@ void write_contents(char *path, char *contents);
 int mkdir_p(char *path);
 
 int str_has_suffix(char *str, char *suffix);
+int str_has_prefix(char *str, char *prefix);
 char *str_concat(char *s1, char *s2);
 
 #ifdef DEBUG
@@ -170,9 +172,11 @@ JSValueRef function_load(JSContextRef ctx, JSObjectRef function, JSObjectRef thi
 
 		// load from out/
 		if (contents == NULL) {
-			char *full_path = str_concat("out/", path);
-			contents = get_contents(full_path, &last_modified);
-			free(full_path);
+			if (out_path != NULL) {
+				char *full_path = str_concat(out_path, path);
+				contents = get_contents(full_path, &last_modified);
+				free(full_path);
+			}
 		}
 
 		if (developing && contents == NULL) {
@@ -348,20 +352,29 @@ JSValueRef function_import_script(JSContextRef ctx, JSObjectRef function, JSObje
 	if (argc == 1 && JSValueGetType(ctx, args[0]) == kJSTypeString) {
 		JSStringRef path_str_ref = JSValueToStringCopy(ctx, args[0], NULL);
 		assert(JSStringGetLength(path_str_ref) < 100);
-		char path[100];
-		path[0] = '\0';
-		JSStringGetUTF8CString(path_str_ref, path, 100);
+		char tmp[100];
+		tmp[0] = '\0';
+		JSStringGetUTF8CString(path_str_ref, tmp, 100);
 		JSStringRelease(path_str_ref);
 
-		char full_path[150];
-		snprintf(full_path, 150, "%s/%s", "out", path);
-		char *buf = get_contents(full_path, NULL);
-		if (buf == NULL) {
-			goto err;
+		char *path = tmp;
+		if (str_has_prefix(path, "goog/../") == 0) {
+			path = path + 8;
 		}
 
-		evaluate_script(ctx, buf, full_path);
-		free(buf);
+		char *source = NULL;
+		if (out_path == NULL) {
+			source = bundle_get_contents(path);
+		} else {
+			char *full_path = str_concat(out_path, path);
+			source = get_contents(full_path, NULL);
+			free(full_path);
+		}
+
+		if (source != NULL) {
+			evaluate_script(ctx, source, path);
+			free(source);
+		}
 	}
 
 	return JSValueMakeUndefined(ctx);
@@ -400,7 +413,6 @@ bool repl = false;
 bool static_fns = false;
 char *cache_path = NULL;
 char *theme = "light";
-char *out_path = NULL;
 
 bool javascript = false;
 
@@ -938,6 +950,17 @@ int str_has_suffix(char *str, char *suffix) {
 	}
 
 	return strcmp(str + (len-suffix_len), suffix);
+}
+
+int str_has_prefix(char *str, char *prefix) {
+	int len = strlen(str);
+	int prefix_len = strlen(prefix);
+
+	if (len < prefix_len) {
+		return -1;
+	}
+
+	return strncmp(str, prefix, prefix_len);
 }
 
 char *str_concat(char *s1, char *s2) {
