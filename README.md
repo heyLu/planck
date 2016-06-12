@@ -4,7 +4,7 @@
 
 `ton` is an attempt to bring [planck][] to Linux (and potentially other systems).
 
-[planck]: https://github.com/heyLu/planck
+[planck]: https://github.com/mfikes/planck
 
 **Warning:** *This is very much a work in progress.  Lots of stuff is still missing, things might not work, ...  I'm not sure if this will work out, so the project might be abandoned.  I'd still love your help, though, so if you also want this to exist, feel free to look around and help!*
 
