@@ -10,7 +10,7 @@
 
 ## Development
 
-- install `webkit2gtk`, `libzip`
+- install `javascriptcoregtk`, `libzip`, `zlib`
 - `git clone https://github.com/mfikes/planck`
 - `pushd planck/planck-cljs; ./script/build; ./script/bundle; popd`
 - `cp -R planck/planck-cljs/out .`
