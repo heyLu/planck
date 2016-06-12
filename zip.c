@@ -9,7 +9,7 @@
 
 void print_zip_err(char *prefix, zip_t *zip);
 
-char *get_contents_zip(char *path, char *name) {
+char *get_contents_zip(char *path, char *name, time_t *last_modified) {
 	zip_t *archive = zip_open(path, ZIP_RDONLY, NULL);
 	if (archive == NULL) {
 		print_zip_err("zip_open", archive);
@@ -26,6 +26,10 @@ char *get_contents_zip(char *path, char *name) {
 	if (f == NULL) {
 		print_zip_err("zip_fopen", archive);
 		goto close_archive;
+	}
+
+	if (last_modified != NULL) {
+		*last_modified = stat.mtime;
 	}
 
 	char *buf = malloc(stat.size + 1);
@@ -63,7 +67,7 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 
-	char *contents = get_contents_zip(argv[1], argv[2]);
+	char *contents = get_contents_zip(argv[1], argv[2], NULL);
 	if (contents == NULL) {
 		return 1;
 	}
