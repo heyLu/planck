@@ -25,7 +25,7 @@ zip-test:
 	$(CC) $(shell pkg-config --cflags --libs libzip) -DZIP_TEST zip.c -o $@
 
 clean:
-	rm -f ton $(OBJECTS)
+	rm -f ton bundle-test zip-test $(OBJECTS)
 
 jsc-funcs:
 	grep -Rh JS_EXPORT /usr/include/webkitgtk-4.0/JavaScriptCore | sed 's/^JS_EXPORT //' | grep -v '^#' > $@
