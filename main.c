@@ -2,6 +2,7 @@
 #include <errno.h>
 #include <getopt.h>
 #include <libgen.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -20,6 +21,12 @@
 char console_log_buf[CONSOLE_LOG_BUF_SIZE];
 
 int exit_value = 0;
+struct src_path {
+	char *type;
+	char *path;
+};
+struct src_path *src_paths = NULL;
+int num_src_paths = 0;
 
 JSStringRef to_string(JSContextRef ctx, JSValueRef val);
 JSValueRef evaluate_script(JSContextRef ctx, char *script, char *source);
@@ -35,6 +42,9 @@ JSObjectRef get_function(JSContextRef ctx, char *namespace, char *name);
 char* get_contents(char *path, time_t *last_modified);
 void write_contents(char *path, char *contents);
 int mkdir_p(char *path);
+
+int str_has_suffix(char *str, char *suffix);
+char *str_concat(char *s1, char *s2);
 
 #ifdef DEBUG
 #define debug_print_value(prefix, ctx, val)	print_value(prefix ": ", ctx, val)
@@ -125,14 +135,44 @@ JSValueRef function_load(JSContextRef ctx, JSObjectRef function, JSObjectRef thi
 
 		// debug_print_value("load", ctx, args[0]);
 
-		char full_path[150];
-		// TODO: should not load from here?
-		snprintf(full_path, 150, "%s/%s", "out", path);
-
-		JSValueRef contents_val = NULL;
-
 		time_t last_modified = 0;
-		char *contents = get_contents(full_path, &last_modified);
+		char *contents = NULL;
+
+		bool developing = (num_src_paths == 1 &&
+		                   strcmp(src_paths[0].type, "src") == 0 &&
+		                   str_has_suffix(src_paths[0].path, "/planck-cljs/src/") == 0);
+
+		// if (!developing) { load from bundle }
+
+		// load from classpath
+		if (contents == NULL) {
+			for (int i = 0; i < num_src_paths; i++) {
+				char *type = src_paths[i].type;
+				char *location = src_paths[i].path;
+
+				if (strcmp(type, "src") == 0) {
+					char *full_path = str_concat(location, path);
+					contents = get_contents(full_path, &last_modified);
+					free(full_path);
+				} else if (strcmp(type, "jar") == 0) {
+					contents = get_contents_zip(location, path, &last_modified);
+				}
+
+				if (contents != NULL) {
+					break;
+				}
+			}
+		}
+
+		// load from out/
+		if (contents == NULL) {
+			char *full_path = str_concat("out/", path);
+			contents = get_contents(full_path, &last_modified);
+			free(full_path);
+		}
+
+		// if (developing) { try from bundle as last-ditch effort }
+
 		if (contents != NULL) {
 			JSStringRef contents_str = JSStringCreateWithUTF8CString(contents);
 			free(contents);
@@ -344,11 +384,12 @@ int main(int argc, char **argv) {
 		{"javascript", no_argument, NULL, 'j'},
 		{"eval", required_argument, NULL, 'e'},
 		{"theme", required_argument, NULL, 't'},
+		{"classpath", required_argument, NULL, 'c'},
 
 		{0, 0, 0, 0}
 	};
 	int opt, option_index;
-	while ((opt = getopt_long(argc, argv, "hvrsk:je:t:", long_options, &option_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hvrsk:je:t:c:", long_options, &option_index)) != -1) {
 		switch (opt) {
 		case 'h':
 			usage(argv[0]);
@@ -376,6 +417,26 @@ int main(int argc, char **argv) {
 		case 't':
 			theme = argv[optind - 1];
 			break;
+		case 'c':
+			{
+				char *classpath = argv[optind - 1];
+				char *source = strtok(classpath, ":");
+				while (source != NULL) {
+					char *type = "src";
+					if (str_has_suffix(source, ".jar") == 0) {
+						type = "jar";
+					}
+
+					num_src_paths += 1;
+					src_paths = realloc(src_paths, num_src_paths * sizeof(struct src_path));
+					src_paths[num_src_paths - 1].type = type;
+					src_paths[num_src_paths - 1].path = strdup(source);
+
+					source = strtok(NULL, ":");
+				}
+
+				break;
+			}
 		case '?':
 			usage(argv[0]);
 			exit(1);
@@ -810,4 +871,26 @@ int mkdir_p(char *path) {
 		return 0;
 	}
 	return res;
+}
+
+int str_has_suffix(char *str, char *suffix) {
+	int len = strlen(str);
+	int suffix_len = strlen(suffix);
+
+	if (len < suffix_len) {
+		return -1;
+	}
+
+	return strcmp(str + (len-suffix_len), suffix);
+}
+
+char *str_concat(char *s1, char *s2) {
+	int l1 = strlen(s1), l2 = strlen(s2);
+	int len = l1 + l2 + 1;
+	char *s = malloc(len * sizeof(char));
+	memset(s, 0, len);
+
+	strncpy(s, s1, l1);
+	strncpy(s+l1, s2, l2);
+	return s;
 }
