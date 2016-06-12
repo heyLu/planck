@@ -37,7 +37,7 @@ char *value_to_c_string(JSContextRef ctx, JSValueRef val);
 JSValueRef evaluate_source(JSContextRef ctx, char *type, char *source_value, bool expression, bool print_nil, char *set_ns, char *theme);
 char *munge(char *s);
 
-void bootstrap(JSContextRef ctx, char *deps_file_path, char *goog_base_path);
+void bootstrap(JSContextRef ctx, char *out_path);
 JSObjectRef get_function(JSContextRef ctx, char *namespace, char *name);
 
 char* get_contents(char *path, time_t *last_modified);
@@ -507,7 +507,7 @@ int main(int argc, char **argv) {
 	evaluate_script(ctx, "var global = this;", "<init>");
 
 	register_global_function(ctx, "IMPORT_SCRIPT", function_import_script);
-	bootstrap(ctx, "out/main.js", "out/goog/base.js");
+	bootstrap(ctx, out_path);
 
 	register_global_function(ctx, "CONSOLE_LOG", function_console_log);
 	register_global_function(ctx, "CONSOLE_ERROR", function_console_error);
@@ -772,25 +772,44 @@ char *munge(char *s) {
 	return ms;
 }
 
-void bootstrap(JSContextRef ctx, char *deps_file_path, char *goog_base_path) {
+void bootstrap(JSContextRef ctx, char *out_path) {
+	char *deps_file_path = "main.js";
+	char *goog_base_path = "goog/base.js";
+	if (out_path != NULL) {
+		deps_file_path = str_concat(out_path, deps_file_path);
+		goog_base_path = str_concat(out_path, goog_base_path);
+	}
+
 	char source[] = "<bootstrap>";
 
 	// Setup CLOSURE_IMPORT_SCRIPT
 	evaluate_script(ctx, "CLOSURE_IMPORT_SCRIPT = function(src) { IMPORT_SCRIPT('goog/' + src); return true; }", source);
 
 	// Load goog base
-	char *base_script_str = get_contents(goog_base_path, NULL);
+	char *base_script_str = NULL;
+	if (out_path) {
+		base_script_str = get_contents(goog_base_path, NULL);
+		free(goog_base_path);
+	} else {
+		base_script_str = bundle_get_contents(goog_base_path);
+	}
 	if (base_script_str == NULL) {
-		fprintf(stderr, "The goog base JavaScript text could not be loaded");
+		fprintf(stderr, "The goog base JavaScript text could not be loaded\n");
 		exit(1);
 	}
 	evaluate_script(ctx, base_script_str, "<bootstrap:base>");
 	free(base_script_str);
 
 	// Load the deps file
-	char *deps_script_str = get_contents(deps_file_path, NULL);
+	char *deps_script_str = NULL;
+	if (out_path) {
+		deps_script_str = get_contents(deps_file_path, NULL);
+		free(deps_file_path);
+	} else {
+		deps_script_str = bundle_get_contents(deps_file_path);
+	}
 	if (deps_script_str == NULL) {
-		fprintf(stderr, "The goog base JavaScript text could not be loaded");
+		fprintf(stderr, "The deps JavaScript text could not be loaded\n");
 		exit(1);
 	}
 	evaluate_script(ctx, deps_script_str, "<bootstrap:deps>");
