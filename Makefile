@@ -19,7 +19,7 @@ linenoise.h:
 	curl -LsSfo $@ https://github.com/antirez/linenoise/raw/master/linenoise.h
 
 bundle-test:
-	$(CC) -g -lz -DBUNDLE_TEST bundle.c -o $@
+	$(CC) -lz -DBUNDLE_TEST bundle.c -o $@
 
 zip-test:
 	$(CC) $(shell pkg-config --cflags --libs libzip) -DZIP_TEST zip.c -o $@
