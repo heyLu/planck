@@ -1,4 +1,4 @@
-.PHONY: bundle-test zip-test clean
+.PHONY: bundle-test zip-test planck clean
 
 CC = clang
 
@@ -9,6 +9,13 @@ LIBFLAGS = $(shell pkg-config --libs $(DEPS))
 SOURCES = $(sort $(wildcard *.c) linenoise.c)
 OBJECTS = $(SOURCES:.c=.o)
 
+# Build only ton
+build: ton
+
+# Bundle cljs dependencies and build with that
+bundle-and-build: planck
+	cd planck; ./script/build-c
+
 ton: $(OBJECTS)
 	$(CC) $(LIBFLAGS) $(OBJECTS) -o $@
 
@@ -17,6 +24,11 @@ linenoise.c: linenoise.h
 
 linenoise.h:
 	curl -LsSfo $@ https://github.com/antirez/linenoise/raw/master/linenoise.h
+
+planck:
+	if [ ! -d planck ]; then git clone https://github.com/mfikes/planck; fi
+	cp script/bundle-c planck/planck-cljs/script/bundle-c
+	cp script/build-c planck/script/build-c
 
 bundle-test:
 	$(CC) -lz -DBUNDLE_TEST bundle.c -o $@
