@@ -727,8 +727,12 @@ JSValueRef evaluate_source(JSContextRef ctx, char *type, char *source, bool expr
 
 	args[1] = JSValueMakeBoolean(ctx, expression);
 	args[2] = JSValueMakeBoolean(ctx, print_nil);
-	JSStringRef set_ns_str = JSStringCreateWithUTF8CString(set_ns);
-	args[3] = JSValueMakeString(ctx, set_ns_str);
+	JSValueRef set_ns_val = NULL;
+	if (set_ns != NULL) {
+		JSStringRef set_ns_str = JSStringCreateWithUTF8CString(set_ns);
+		set_ns_val = JSValueMakeString(ctx, set_ns_str);
+	}
+	args[3] = set_ns_val;
 	JSStringRef theme_str = JSStringCreateWithUTF8CString(theme);
 	args[4] = JSValueMakeString(ctx, theme_str);
 	args[5] = JSValueMakeNumber(ctx, 0);
