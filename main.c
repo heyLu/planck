@@ -96,12 +96,8 @@ JSValueRef function_read_file(JSContextRef ctx, JSObjectRef function, JSObjectRe
 
 		// debug_print_value("read_file", ctx, args[0]);
 
-		char full_path[150];
-		// TODO: should not load from here?
-		snprintf(full_path, 150, "%s/%s", "out", path);
-
 		time_t last_modified = 0;
-		char *contents = get_contents(full_path, &last_modified);
+		char *contents = get_contents(path, &last_modified);
 		if (contents != NULL) {
 			JSStringRef contents_str = JSStringCreateWithUTF8CString(contents);
 			free(contents);
