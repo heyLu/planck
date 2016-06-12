@@ -1,3 +1,5 @@
+.PHONY: zip-test clean
+
 CC = clang
 
 DEPS = javascriptcoregtk-4.0 libzip
@@ -15,6 +17,9 @@ linenoise.c: linenoise.h
 
 linenoise.h:
 	curl -LsSfo $@ https://github.com/antirez/linenoise/raw/master/linenoise.h
+
+zip-test:
+	$(CC) $(LIBFLAGS) -DZIP_TEST zip.c -o $@
 
 clean:
 	rm -f ton $(OBJECTS)

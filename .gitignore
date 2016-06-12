@@ -1,5 +1,7 @@
 /ton
+/zip-test
 /*.o
+
 /.planck_cache
 /out
 /jsc-funcs

@@ -55,3 +55,22 @@ void print_zip_err(char *prefix, zip_t *zip) {
 		printf("%s: %s\n", prefix, zip_error_strerror(err));
 		zip_error_fini(err);
 }
+
+#ifdef ZIP_TEST
+int main(int argc, char **argv) {
+	if (argc != 3) {
+		printf("%s <zip-file> <path>\n", argv[0]);
+		return 1;
+	}
+
+	char *contents = get_contents_zip(argv[1], argv[2]);
+	if (contents == NULL) {
+		return 1;
+	}
+
+	printf("%s", contents);
+	free(contents);
+
+	return 0;
+}
+#endif
