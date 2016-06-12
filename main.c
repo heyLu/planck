@@ -400,6 +400,7 @@ bool repl = false;
 bool static_fns = false;
 char *cache_path = NULL;
 char *theme = "light";
+char *out_path = NULL;
 
 bool javascript = false;
 
@@ -417,11 +418,12 @@ int main(int argc, char **argv) {
 		{"eval", required_argument, NULL, 'e'},
 		{"theme", required_argument, NULL, 't'},
 		{"classpath", required_argument, NULL, 'c'},
+		{"out", required_argument, NULL, 'o'},
 
 		{0, 0, 0, 0}
 	};
 	int opt, option_index;
-	while ((opt = getopt_long(argc, argv, "hvrsk:je:t:c:", long_options, &option_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hvrsk:je:t:c:o:", long_options, &option_index)) != -1) {
 		switch (opt) {
 		case 'h':
 			usage(argv[0]);
@@ -469,6 +471,9 @@ int main(int argc, char **argv) {
 
 				break;
 			}
+		case 'o':
+			out_path = argv[optind - 1];
+			break;
 		case '?':
 			usage(argv[0]);
 			exit(1);
