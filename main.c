@@ -427,11 +427,12 @@ int main(int argc, char **argv) {
 		{"theme", required_argument, NULL, 't'},
 		{"classpath", required_argument, NULL, 'c'},
 		{"out", required_argument, NULL, 'o'},
+		{"auto-cache", no_argument, NULL, 'K'},
 
 		{0, 0, 0, 0}
 	};
 	int opt, option_index;
-	while ((opt = getopt_long(argc, argv, "hvrsk:je:t:c:o:", long_options, &option_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hvrsk:je:t:c:o:K", long_options, &option_index)) != -1) {
 		switch (opt) {
 		case 'h':
 			usage(argv[0]);
@@ -447,6 +448,17 @@ int main(int argc, char **argv) {
 			break;
 		case 'k':
 			cache_path = argv[optind - 1];
+			break;
+		case 'K':
+			cache_path = ".planck_cache";
+			{
+				char *path_copy = strdup(cache_path);
+				char *dir = dirname(path_copy);
+				if (mkdir_p(dir) < 0) {
+					fprintf(stderr, "Could not create %s: %s\n", cache_path, strerror(errno));
+				}
+				free(path_copy);
+			}
 			break;
 		case 'j':
 			javascript = true;
@@ -548,8 +560,12 @@ int main(int argc, char **argv) {
 		JSValueRef arguments[4];
 		arguments[0] = JSValueMakeBoolean(ctx, repl);
 		arguments[1] = JSValueMakeBoolean(ctx, verbose);
-		JSStringRef cache_path_str = JSStringCreateWithUTF8CString(".planck_cache");
-		arguments[2] = JSValueMakeString(ctx, cache_path_str);
+		JSValueRef cache_path_ref = NULL;
+		if (cache_path != NULL) {
+			JSStringRef cache_path_str = JSStringCreateWithUTF8CString(cache_path);
+			cache_path_ref = JSValueMakeString(ctx, cache_path_str);
+		}
+		arguments[2] = cache_path_ref;
 		arguments[3] = JSValueMakeBoolean(ctx, static_fns);
 		JSValueRef ex = NULL;
 		JSObjectCallAsFunction(ctx, get_function(ctx, "planck.repl", "init"), JSContextGetGlobalObject(ctx), 4, arguments, &ex);
@@ -888,15 +904,6 @@ err:
 void write_contents(char *path, char *contents) {
 	char *err_prefix;
 
-	char *path_copy = strdup(path);
-	char *dir = dirname(path_copy);
-	if (mkdir_p(dir) < 0) {
-		err_prefix = "mkdir_p";
-		free(path_copy);
-		goto err;
-	}
-	free(path_copy);
-
 	FILE *f = fopen(path, "w");
 	if (f == NULL) {
 		err_prefix = "fopen";
@@ -922,7 +929,7 @@ void write_contents(char *path, char *contents) {
 	return;
 
 err:
-	printf("write_contents(\"%s\", ...): %s: %s\n", path, err_prefix, strerror(errno));
+	// printf("write_contents(\"%s\", ...): %s: %s\n", path, err_prefix, strerror(errno));
 	return;
 }
 
