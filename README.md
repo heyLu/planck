@@ -23,6 +23,12 @@
 
 A lot of stuff is still missing (in fact most of it).
 
+## Code of Conduct
+
+Every participant in the development of `ton` is expected to follow our [Code of Conduct][].
+
+[Code of Conduct]: https://github.com/heyLu/ton/tree/master/CODE_OF_CONDUCT.md
+
 ## License
 
 Copyright © 2016 Mike Fikes, Lucas Stadler and Contributors
