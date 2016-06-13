@@ -18,7 +18,7 @@
 #include "bundle.h"
 #include "zip.h"
 
-#define TON_VERSION "0.0.1"
+#define TON_VERSION "0.0.2"
 
 #define CONSOLE_LOG_BUF_SIZE 1000
 char console_log_buf[CONSOLE_LOG_BUF_SIZE];
