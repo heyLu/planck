@@ -584,6 +584,8 @@ int main(int argc, char **argv) {
 			"console.log = CONSOLE_LOG;"\
 			"console.error = CONSOLE_ERROR;", "<init>");
 
+	evaluate_script(ctx, "var PLANCK_VERSION = \"" TON_VERSION "\";", "<init>");
+
 	// require app namespaces
 	evaluate_script(ctx, "goog.require('planck.repl');", "<init>");
 
