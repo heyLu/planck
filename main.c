@@ -18,6 +18,8 @@
 #include "bundle.h"
 #include "zip.h"
 
+#define TON_VERSION "0.0.1"
+
 #define CONSOLE_LOG_BUF_SIZE 1000
 char console_log_buf[CONSOLE_LOG_BUF_SIZE];
 
@@ -395,6 +397,7 @@ void usage(char *program_name) {
 	printf(
 		"  -h, --help       Display this help message\n"
 		"  -v, --verbose    Print verbose diagnostics\n"
+		"  -q, --quiet      Quiet mode\n"
 		"  -r, --repl       Whether to start a REPL\n"
 		"  -s, --static-fns Whether to use the :static-fns compiler option\n"
 		"  -k, --cache      The directory to cache compiler results in\n"
@@ -405,7 +408,34 @@ void usage(char *program_name) {
 	);
 }
 
+char *get_cljs_version() {
+	char *bundle_js = bundle_get_contents("planck/bundle.js");
+	if (bundle_js != NULL) {
+		char *start = bundle_js + 29;
+		char *version = strtok(start, " ");
+		version = strdup(version);
+		free(bundle_js);
+		return version;
+	} else {
+		return "(Unknown)";
+	}
+}
+
+void banner() {
+	printf("ton %s\n", TON_VERSION);
+	printf("ClojureScript %s\n", get_cljs_version());
+
+	printf("    Docs: (doc function-name-here)\n");
+	printf("          (find-doc \"part-of-name-here\")\n");
+	printf("  Source: (source function-name-here)\n");
+	printf("    Exit: Control+D or :cljs/quit or exit or quit\n");
+	printf(" Results: Stored in vars *1, *2, *3, an exception in *e\n");
+
+	printf("\n");
+}
+
 bool verbose = false;
+bool quiet = false;
 bool repl = false;
 bool static_fns = false;
 char *cache_path = NULL;
@@ -425,6 +455,7 @@ int main(int argc, char **argv) {
 	struct option long_options[] = {
 		{"help", no_argument, NULL, 'h'},
 		{"verbose", no_argument, NULL, 'v'},
+		{"quiet", no_argument, NULL, 'q'},
 		{"repl", no_argument, NULL, 'r'},
 		{"static-fns", no_argument, NULL, 's'},
 		{"cache", required_argument, NULL, 'k'},
@@ -439,13 +470,16 @@ int main(int argc, char **argv) {
 		{0, 0, 0, 0}
 	};
 	int opt, option_index;
-	while ((opt = getopt_long(argc, argv, "hvrsk:je:t:c:o:Ki:", long_options, &option_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hvrsk:je:t:c:o:Ki:q", long_options, &option_index)) != -1) {
 		switch (opt) {
 		case 'h':
 			usage(argv[0]);
 			exit(0);
 		case 'v':
 			verbose = true;
+			break;
+		case 'q':
+			quiet = true;
 			break;
 		case 'r':
 			repl = true;
@@ -602,6 +636,10 @@ int main(int argc, char **argv) {
 	}
 
 	if (repl) {
+		if (!quiet) {
+			banner();
+		}
+
 		char *home = getenv("HOME");
 		char *history_path = NULL;
 		if (home != NULL) {
