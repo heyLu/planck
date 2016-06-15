@@ -681,9 +681,23 @@ int main(int argc, char **argv) {
 	if (main_ns_name != NULL) {
 		exit_value = run_main_in_ns(ctx, main_ns_name, num_rest_args, rest_args);
 	} else if (!repl && num_rest_args > 0) {
-		// TODO: implement running scripts directly
-		printf("%s:%d: not implemented\n", __FILE__, __LINE__);
-		exit(2);
+		char *path = rest_args[0];
+
+		struct script script;
+		if (strcmp(path, "-") == 0) {
+			char *source = read_all(stdin);
+			script.type = "text";
+			script.source = source;
+			script.expression = false;
+		} else {
+			script.type = "path";
+			script.source = path;
+			script.expression = false;
+		}
+
+		evaluate_source(ctx, script.type, script.source, script.expression, false, NULL, theme);
+		// TODO: get exit value from cljs
+		exit_value = 0;
 	} else if (repl) {
 		if (!quiet) {
 			banner();

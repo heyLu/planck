@@ -5,6 +5,32 @@
 #include <time.h>
 #include <sys/stat.h>
 
+#define CHUNK_SIZE 1024
+
+char *read_all(FILE *f) {
+	int len = CHUNK_SIZE + 1;
+	char *buf = malloc(len * sizeof(char));
+
+	int offset = 0;
+	for (;;) {
+		if (len - offset < CHUNK_SIZE) {
+			len = 2 * len + CHUNK_SIZE;
+			buf = realloc(buf, len * sizeof(char));
+		}
+		int n = fread(buf + offset, 1, CHUNK_SIZE, f);
+		offset += n;
+		if (feof(f)) {
+			break;
+		}
+		if (ferror(f)) {
+			// fprintf(stderr, "Error: %s: %s\n", __func__, strerror(errno));
+			return NULL;
+		}
+	}
+	memset(buf + offset, 0, len - offset);
+	return buf;
+}
+
 char *get_contents(char *path, time_t *last_modified) {
 /*#ifdef DEBUG
 	printf("get_contents(\"%s\")\n", path);
