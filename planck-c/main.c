@@ -396,7 +396,7 @@ void usage(char *program_name) {
 	printf("    -t theme, --theme=theme  Set the color theme\n");
 	// printf("    -n x, --socket-repl=x    Enable socket REPL where x is port or IP:port\n");
 	printf("    -s, --static-fns         Generate static dispatch function calls\n");
-	// printf("    -a, --elide-asserts      Set *assert* to false to remove asserts\n");
+	printf("    -a, --elide-asserts      Set *assert* to false to remove asserts\n");
 	printf("\n");
 	printf("  main options:\n");
 	// printf("    -m ns-name, --main=ns-name Call the -main function from a namespace with\n");
@@ -455,6 +455,7 @@ bool verbose = false;
 bool quiet = false;
 bool repl = false;
 bool static_fns = false;
+bool elide_asserts = false;
 char *cache_path = NULL;
 char *theme = "light";
 
@@ -475,6 +476,7 @@ int main(int argc, char **argv) {
 		{"quiet", no_argument, NULL, 'q'},
 		{"repl", no_argument, NULL, 'r'},
 		{"static-fns", no_argument, NULL, 's'},
+		{"elide-asserts", no_argument, NULL, 'a'},
 		{"cache", required_argument, NULL, 'k'},
 		{"eval", required_argument, NULL, 'e'},
 		{"theme", required_argument, NULL, 't'},
@@ -489,7 +491,7 @@ int main(int argc, char **argv) {
 		{0, 0, 0, 0}
 	};
 	int opt, option_index;
-	while ((opt = getopt_long(argc, argv, "h?vrsk:je:t:c:o:Ki:q", long_options, &option_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "h?vrsak:je:t:c:o:Ki:q", long_options, &option_index)) != -1) {
 		switch (opt) {
 		case 'h':
 			usage(argv[0]);
@@ -505,6 +507,9 @@ int main(int argc, char **argv) {
 			break;
 		case 's':
 			static_fns = true;
+			break;
+		case 'a':
+			elide_asserts = true;
 			break;
 		case 'k':
 			cache_path = argv[optind - 1];
@@ -626,6 +631,10 @@ int main(int argc, char **argv) {
 
 	evaluate_script(ctx, "cljs.core.set_print_fn_BANG_.call(null,PLANCK_PRINT_FN);", "<init>");
 	evaluate_script(ctx, "cljs.core.set_print_err_fn_BANG_.call(null,PLANCK_PRINT_ERR_FN);", "<init>");
+
+	char *elide_script = str_concat("cljs.core._STAR_assert_STAR_ = ", elide_asserts ? "false" : "true");
+	evaluate_script(ctx, elide_script, "<init>");
+	free(elide_script);
 
 	{
 		JSValueRef arguments[4];
