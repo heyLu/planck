@@ -56,3 +56,8 @@ char *value_to_c_string(JSContextRef ctx, JSValueRef val) {
 
 	return str;
 }
+
+JSValueRef c_string_to_value(JSContextRef ctx, char *s) {
+	JSStringRef str = JSStringCreateWithUTF8CString(s);
+	return JSValueMakeString(ctx, str);
+}

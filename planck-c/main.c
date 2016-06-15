@@ -399,8 +399,8 @@ void usage(char *program_name) {
 	printf("    -a, --elide-asserts      Set *assert* to false to remove asserts\n");
 	printf("\n");
 	printf("  main options:\n");
-	// printf("    -m ns-name, --main=ns-name Call the -main function from a namespace with\n");
-	// printf("                               args\n");
+	printf("    -m ns-name, --main=ns-name Call the -main function from a namespace with\n");
+	printf("                               args\n");
 	printf("    -r, --repl                 Run a repl\n");
 	// printf("    path                       Run a script from a file or resource\n");
 	// printf("    -                          Run a script from standard input\n");
@@ -458,6 +458,7 @@ bool static_fns = false;
 bool elide_asserts = false;
 char *cache_path = NULL;
 char *theme = "light";
+char *main_ns_name = NULL;
 
 bool javascript = false;
 
@@ -483,6 +484,7 @@ int main(int argc, char **argv) {
 		{"classpath", required_argument, NULL, 'c'},
 		{"auto-cache", no_argument, NULL, 'K'},
 		{"init", required_argument, NULL, 'i'},
+		{"main", required_argument, NULL, 'm'},
 
 		// development options
 		{"javascript", no_argument, NULL, 'j'},
@@ -491,7 +493,7 @@ int main(int argc, char **argv) {
 		{0, 0, 0, 0}
 	};
 	int opt, option_index;
-	while ((opt = getopt_long(argc, argv, "h?vrsak:je:t:c:o:Ki:q", long_options, &option_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "h?vrsak:je:t:c:o:Ki:qm:", long_options, &option_index)) != -1) {
 		switch (opt) {
 		case 'h':
 			usage(argv[0]);
@@ -542,6 +544,8 @@ int main(int argc, char **argv) {
 			scripts[num_scripts - 1].expression = false;
 			scripts[num_scripts - 1].source = argv[optind - 1];
 			break;
+		case 'm':
+			main_ns_name = argv[optind - 1];
 		case 't':
 			theme = argv[optind - 1];
 			break;
@@ -587,8 +591,12 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	if (num_rest_args == 0 && num_scripts == 0) {
+	if (num_scripts == 0 && main_ns_name == NULL && num_rest_args == 0) {
 		repl = true;
+	}
+
+	if (main_ns_name != NULL && repl) {
+		printf("Only one main-opt can be specified.");
 	}
 
 	JSGlobalContextRef ctx = JSGlobalContextCreate(NULL);
@@ -661,11 +669,22 @@ int main(int argc, char **argv) {
 
 	evaluate_script(ctx, "cljs.core._STAR_assert_STAR_ = true;", "<init>");
 
+	// Process init arguments
+
 	for (int i = 0; i < num_scripts; i++) {
+		// TODO: exit if not successfull
 		evaluate_source(ctx, scripts[i].type, scripts[i].source, scripts[i].expression, false, NULL, theme);
 	}
 
-	if (repl) {
+	// Process main arguments
+
+	if (main_ns_name != NULL) {
+		exit_value = run_main_in_ns(ctx, main_ns_name, num_rest_args, rest_args);
+	} else if (!repl && num_rest_args > 0) {
+		// TODO: implement running scripts directly
+		printf("%s:%d: not implemented\n", __FILE__, __LINE__);
+		exit(2);
+	} else if (repl) {
 		if (!quiet) {
 			banner();
 		}

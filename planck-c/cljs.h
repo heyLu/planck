@@ -5,3 +5,5 @@ char *munge(char *s);
 
 void bootstrap(JSContextRef ctx, char *out_path);
 JSObjectRef get_function(JSContextRef ctx, char *namespace, char *name);
+
+int run_main_in_ns(JSContextRef ctx, char *ns, int argc, char **argv);
