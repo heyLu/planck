@@ -27,6 +27,7 @@
 #define CONSOLE_LOG_BUF_SIZE 1000
 char console_log_buf[CONSOLE_LOG_BUF_SIZE];
 
+bool is_tty = false;
 int exit_value = 0;
 struct src_path {
 	char *type;
@@ -334,6 +335,55 @@ JSValueRef function_set_exit_value(JSContextRef ctx, JSObjectRef function, JSObj
 	return JSValueMakeNull(ctx);
 }
 
+JSValueRef function_raw_read_stdin(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+		size_t argc, const JSValueRef args[], JSValueRef* exception) {
+	char buf[1024 + 1];
+
+	int n = fread(buf, 1, is_tty ? 1 : 1024, stdin);
+	if (n > 0) {
+		buf[n] = '\0';
+		return c_string_to_value(ctx, buf);
+	}
+
+	return JSValueMakeNull(ctx);
+}
+
+JSValueRef function_raw_write_stdout(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+		size_t argc, const JSValueRef args[], JSValueRef* exception) {
+	if (argc == 1 && JSValueGetType(ctx, args[0]) == kJSTypeString) {
+		char *s = value_to_c_string(ctx, args[0]);
+		fprintf(stdout, "%s", s);
+		free(s);
+	}
+
+	return JSValueMakeNull(ctx);
+}
+
+JSValueRef function_raw_flush_stdout(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+		size_t argc, const JSValueRef args[], JSValueRef* exception) {
+	fflush(stdout);
+
+	return JSValueMakeNull(ctx);
+}
+
+JSValueRef function_raw_write_stderr(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+		size_t argc, const JSValueRef args[], JSValueRef* exception) {
+	if (argc == 1 && JSValueGetType(ctx, args[0]) == kJSTypeString) {
+		char *s = value_to_c_string(ctx, args[0]);
+		fprintf(stderr, "%s", s);
+		free(s);
+	}
+
+	return JSValueMakeNull(ctx);
+}
+
+JSValueRef function_raw_flush_stderr(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
+		size_t argc, const JSValueRef args[], JSValueRef* exception) {
+	fflush(stderr);
+
+	return JSValueMakeNull(ctx);
+}
+
 JSValueRef function_import_script(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject,
 		size_t argc, const JSValueRef args[], JSValueRef* exception) {
 	if (argc == 1 && JSValueGetType(ctx, args[0]) == kJSTypeString) {
@@ -636,6 +686,26 @@ int main(int argc, char **argv) {
 	register_global_function(ctx, "PLANCK_PRINT_ERR_FN", function_print_err_fn);
 
 	register_global_function(ctx, "PLANCK_SET_EXIT_VALUE", function_set_exit_value);
+
+	is_tty = isatty(STDIN_FILENO) == 1;
+	register_global_function(ctx, "PLANCK_RAW_READ_STDIN", function_raw_read_stdin);
+	register_global_function(ctx, "PLANCK_RAW_WRITE_STDOUT", function_raw_write_stdout);
+	register_global_function(ctx, "PLANCK_RAW_FLUSH_STDOUT", function_raw_flush_stdout);
+	register_global_function(ctx, "PLANCK_RAW_WRITE_STDERR", function_raw_write_stderr);
+	register_global_function(ctx, "PLANCK_RAW_FLUSH_STDERR", function_raw_flush_stderr);
+
+	{
+		JSValueRef arguments[num_rest_args];
+		for (int i = 0; i < num_rest_args; i++) {
+			arguments[i] = c_string_to_value(ctx, rest_args[i]);
+		}
+		JSValueRef args_ref = JSObjectMakeArray(ctx, num_rest_args, arguments, NULL);
+
+		JSValueRef global_obj = JSContextGetGlobalObject(ctx);
+		JSStringRef prop = JSStringCreateWithUTF8CString("PLANCK_INITIAL_COMMAND_LINE_ARGS");
+		JSObjectSetProperty(ctx, JSValueToObject(ctx, global_obj, NULL), prop, args_ref, kJSPropertyAttributeNone, NULL);
+		JSStringRelease(prop);
+	}
 
 	evaluate_script(ctx, "cljs.core.set_print_fn_BANG_.call(null,PLANCK_PRINT_FN);", "<init>");
 	evaluate_script(ctx, "cljs.core.set_print_err_fn_BANG_.call(null,PLANCK_PRINT_ERR_FN);", "<init>");
