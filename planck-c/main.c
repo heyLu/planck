@@ -377,19 +377,52 @@ void register_global_function(JSContextRef ctx, char *name, JSObjectCallAsFuncti
 }
 
 void usage(char *program_name) {
-	printf("%s [flags]\n", program_name);
+	printf("Planck %s\n", PLANCK_VERSION);
+	printf("Usage:  %s [init-opt*] [main-opt] [arg*]\n", program_name);
 	printf("\n");
-	printf(
-		"  -h, --help       Display this help message\n"
-		"  -v, --verbose    Print verbose diagnostics\n"
-		"  -q, --quiet      Quiet mode\n"
-		"  -r, --repl       Whether to start a REPL\n"
-		"  -s, --static-fns Whether to use the :static-fns compiler option\n"
-		"  -k, --cache      The directory to cache compiler results in\n"
-		"  -e, --eval       Evaluate the given expression\n"
-		"  -t, --theme      The theme to use (dumb, light, dark)\n"
-		"  -i, --init       Evaluate the file at path\n"
-	);
+	printf("  With no options or args, runs an interactive Read-Eval-Print Loop\n");
+	printf("\n");
+	printf("  init options:\n");
+	printf("    -i path, --init=path     Load a file or resource\n");
+	printf("    -e string, --eval=string Evaluate expressions in string; print non-nil\n");
+	printf("                             values\n");
+	printf("    -c cp, --classpath=cp    Use colon-delimited cp for source directories and\n");
+	printf("                             JARs\n");
+	printf("    -K, --auto-cache         Create and use .planck_cache dir for cache\n");
+	printf("    -k path, --cache=path    If dir exists at path, use it for cache\n");
+	printf("    -q, --quiet              Quiet mode\n");
+	printf("    -v, --verbose            Emit verbose diagnostic output\n");
+	// printf("    -d, --dumb-terminal      Disable line editing / VT100 terminal control\n");
+	printf("    -t theme, --theme=theme  Set the color theme\n");
+	// printf("    -n x, --socket-repl=x    Enable socket REPL where x is port or IP:port\n");
+	printf("    -s, --static-fns         Generate static dispatch function calls\n");
+	// printf("    -a, --elide-asserts      Set *assert* to false to remove asserts\n");
+	printf("\n");
+	printf("  main options:\n");
+	// printf("    -m ns-name, --main=ns-name Call the -main function from a namespace with\n");
+	// printf("                               args\n");
+	printf("    -r, --repl                 Run a repl\n");
+	// printf("    path                       Run a script from a file or resource\n");
+	// printf("    -                          Run a script from standard input\n");
+	printf("    -h, -?, --help             Print this help message and exit\n");
+	// printf("    -l, --legal                Show legal info (licenses and copyrights)\n");
+	printf("\n");
+	printf("  operation:\n");
+	printf("\n");
+	printf("    - Enters the cljs.user namespace\n");
+	// printf("    - Binds planck.core/*command-line-args* to a seq of strings containing\n");
+	// printf("      command line args that appear after any main option\n");
+	printf("    - Runs all init options in order\n");
+	// printf("    - Calls a -main function or runs a repl or script if requested\n");
+	printf("    - Runs a repl or script if requested\n");
+	printf("\n");
+	printf("  The init options may be repeated and mixed freely, but must appear before\n");
+	printf("  any main option.\n");
+	printf("\n");
+	printf("  Paths may be absolute or relative in the filesystem.\n");
+	printf("\n");
+	printf("  A comprehensive User Guide for Planck can be found at http://planck-repl.org\n");
+	printf("\n");
 }
 
 char *get_cljs_version() {
