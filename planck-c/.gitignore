@@ -1,18 +1,15 @@
-/ton
+/planck
 /bundle-test
 /zip-test
 /*.o
 /*.tar.gz
 
-/.planck_cache
-/out
-/jsc-funcs
-
 /linenoise.c
 /linenoise.h
+/jsc-funcs
 
-/planck
+/.planck_cache
+/out
+
 /*.js
 /*.jar
-
-/.vscode
