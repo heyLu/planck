@@ -4,9 +4,17 @@ VERSION = $(shell git describe --tags)
 
 CC = clang
 
-DEPS = javascriptcoregtk-4.0 libzip
-CFLAGS = -Wall $(shell pkg-config --cflags $(DEPS)) -DDEBUG $(EXTRA_CFLAGS)
-LIBFLAGS = $(shell pkg-config --libs $(DEPS))
+CFLAGS = -Wall -DDEBUG
+UNAME_S = $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+	DEPS = javascriptcoregtk-4.0 libzip
+	CFLAGS += $(shell pkg-config --cflags $(DEPS))
+	LIBFLAGS = $(shell pkg-config --libs $(DEPS))
+endif
+ifeq ($(UNAME_S),Darwin)
+	LIBFLAGS += -lJavaScriptCore -lzip -lz
+endif
+CFLAGS += $(EXTRA_CFLAGS)
 
 SOURCES = $(sort $(wildcard *.c) linenoise.c)
 OBJECTS = $(SOURCES:.c=.o)
