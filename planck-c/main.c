@@ -679,7 +679,7 @@ int main(int argc, char **argv) {
 	// Process main arguments
 
 	if (main_ns_name != NULL) {
-		exit_value = run_main_in_ns(ctx, main_ns_name, num_rest_args, rest_args);
+		run_main_in_ns(ctx, main_ns_name, num_rest_args, rest_args);
 	} else if (!repl && num_rest_args > 0) {
 		char *path = rest_args[0];
 
@@ -696,8 +696,6 @@ int main(int argc, char **argv) {
 		}
 
 		evaluate_source(ctx, script.type, script.source, script.expression, false, NULL, theme);
-		// TODO: get exit value from cljs
-		exit_value = 0;
 	} else if (repl) {
 		if (!quiet) {
 			banner();
