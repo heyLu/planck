@@ -598,15 +598,15 @@ int main(int argc, char **argv) {
 
 	evaluate_script(ctx, "var global = this;", "<init>");
 
-	register_global_function(ctx, "IMPORT_SCRIPT", function_import_script);
+	register_global_function(ctx, "AMBLY_IMPORT_SCRIPT", function_import_script);
 	bootstrap(ctx, out_path);
 
-	register_global_function(ctx, "CONSOLE_LOG", function_console_log);
-	register_global_function(ctx, "CONSOLE_ERROR", function_console_error);
+	register_global_function(ctx, "PLANCK_CONSOLE_LOG", function_console_log);
+	register_global_function(ctx, "PLANCK_CONSOLE_ERROR", function_console_error);
 
 	evaluate_script(ctx, "var console = {};"\
-			"console.log = CONSOLE_LOG;"\
-			"console.error = CONSOLE_ERROR;", "<init>");
+			"console.log = PLANCK_CONSOLE_LOG;"\
+			"console.error = PLANCK_CONSOLE_ERROR;", "<init>");
 
 	evaluate_script(ctx, "var PLANCK_VERSION = \"" PLANCK_VERSION "\";", "<init>");
 

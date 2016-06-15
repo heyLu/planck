@@ -147,7 +147,7 @@ void bootstrap(JSContextRef ctx, char *out_path) {
 	char source[] = "<bootstrap>";
 
 	// Setup CLOSURE_IMPORT_SCRIPT
-	evaluate_script(ctx, "CLOSURE_IMPORT_SCRIPT = function(src) { IMPORT_SCRIPT('goog/' + src); return true; }", source);
+	evaluate_script(ctx, "CLOSURE_IMPORT_SCRIPT = function(src) { AMBLY_IMPORT_SCRIPT('goog/' + src); return true; }", source);
 
 	// Load goog base
 	char *base_script_str = NULL;
