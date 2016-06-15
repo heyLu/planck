@@ -7,7 +7,9 @@ platforms.
 
 ## Development
 
-- install `javascriptcoregtk`, `libzip`, `zlib`
+- install `javascriptcore`, `libzip`, `zlib`
+    - on mac: `brew install libzip`
+    - on arch: `pacman -S webkit2gtk libzip zlib`
 - `make bundle-and-build`
 - have fun: `./planck`
 
