@@ -489,7 +489,7 @@ int main(int argc, char **argv) {
 		{0, 0, 0, 0}
 	};
 	int opt, option_index;
-	while ((opt = getopt_long(argc, argv, "hvrsk:je:t:c:o:Ki:q", long_options, &option_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "h?vrsk:je:t:c:o:Ki:q", long_options, &option_index)) != -1) {
 		switch (opt) {
 		case 'h':
 			usage(argv[0]);
