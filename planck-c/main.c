@@ -386,7 +386,6 @@ void usage(char *program_name) {
 		"  -r, --repl       Whether to start a REPL\n"
 		"  -s, --static-fns Whether to use the :static-fns compiler option\n"
 		"  -k, --cache      The directory to cache compiler results in\n"
-		"  -j, --javascript Whether to run a JavaScript REPL\n"
 		"  -e, --eval       Evaluate the given expression\n"
 		"  -t, --theme      The theme to use (dumb, light, dark)\n"
 		"  -i, --init       Evaluate the file at path\n"
@@ -444,13 +443,15 @@ int main(int argc, char **argv) {
 		{"repl", no_argument, NULL, 'r'},
 		{"static-fns", no_argument, NULL, 's'},
 		{"cache", required_argument, NULL, 'k'},
-		{"javascript", no_argument, NULL, 'j'},
 		{"eval", required_argument, NULL, 'e'},
 		{"theme", required_argument, NULL, 't'},
 		{"classpath", required_argument, NULL, 'c'},
-		{"out", required_argument, NULL, 'o'},
 		{"auto-cache", no_argument, NULL, 'K'},
 		{"init", required_argument, NULL, 'i'},
+
+		// development options
+		{"javascript", no_argument, NULL, 'j'},
+		{"out", required_argument, NULL, 'o'},
 
 		{0, 0, 0, 0}
 	};
