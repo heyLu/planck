@@ -19,6 +19,7 @@
 #include "cljs.h"
 #include "io.h"
 #include "jsc_utils.h"
+#include "legal.h"
 #include "str.h"
 #include "zip.h"
 
@@ -455,7 +456,7 @@ void usage(char *program_name) {
 	// printf("    path                       Run a script from a file or resource\n");
 	// printf("    -                          Run a script from standard input\n");
 	printf("    -h, -?, --help             Print this help message and exit\n");
-	// printf("    -l, --legal                Show legal info (licenses and copyrights)\n");
+	printf("    -l, --legal                Show legal info (licenses and copyrights)\n");
 	printf("\n");
 	printf("  operation:\n");
 	printf("\n");
@@ -523,6 +524,7 @@ int num_scripts = 0;
 int main(int argc, char **argv) {
 	struct option long_options[] = {
 		{"help", no_argument, NULL, 'h'},
+		{"legal", no_argument, NULL, 'l'},
 		{"verbose", no_argument, NULL, 'v'},
 		{"quiet", no_argument, NULL, 'q'},
 		{"repl", no_argument, NULL, 'r'},
@@ -543,11 +545,14 @@ int main(int argc, char **argv) {
 		{0, 0, 0, 0}
 	};
 	int opt, option_index;
-	while ((opt = getopt_long(argc, argv, "h?vrsak:je:t:c:o:Ki:qm:", long_options, &option_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "h?lvrsak:je:t:c:o:Ki:qm:", long_options, &option_index)) != -1) {
 		switch (opt) {
 		case 'h':
 			usage(argv[0]);
 			exit(0);
+		case 'l':
+			legal();
+			return 0;
 		case 'v':
 			verbose = true;
 			break;
