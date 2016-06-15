@@ -18,7 +18,7 @@
 #include "bundle.h"
 #include "zip.h"
 
-#define TON_VERSION "0.0.2"
+#define PLANCK_VERSION "0.0.2"
 
 #define CONSOLE_LOG_BUF_SIZE 1000
 char console_log_buf[CONSOLE_LOG_BUF_SIZE];
@@ -422,7 +422,7 @@ char *get_cljs_version() {
 }
 
 void banner() {
-	printf("ton %s\n", TON_VERSION);
+	printf("Planck %s\n", PLANCK_VERSION);
 	printf("ClojureScript %s\n", get_cljs_version());
 
 	printf("    Docs: (doc function-name-here)\n");
@@ -569,7 +569,7 @@ int main(int argc, char **argv) {
 
 	JSGlobalContextRef ctx = JSGlobalContextCreate(NULL);
 
-	JSStringRef nameRef = JSStringCreateWithUTF8CString("ton");
+	JSStringRef nameRef = JSStringCreateWithUTF8CString("planck");
 	JSGlobalContextSetName(ctx, nameRef);
 
 	evaluate_script(ctx, "var global = this;", "<init>");
@@ -584,7 +584,7 @@ int main(int argc, char **argv) {
 			"console.log = CONSOLE_LOG;"\
 			"console.error = CONSOLE_ERROR;", "<init>");
 
-	evaluate_script(ctx, "var PLANCK_VERSION = \"" TON_VERSION "\";", "<init>");
+	evaluate_script(ctx, "var PLANCK_VERSION = \"" PLANCK_VERSION "\";", "<init>");
 
 	// require app namespaces
 	evaluate_script(ctx, "goog.require('planck.repl');", "<init>");
@@ -645,7 +645,7 @@ int main(int argc, char **argv) {
 		char *home = getenv("HOME");
 		char *history_path = NULL;
 		if (home != NULL) {
-			char history_name[] = ".ton_history";
+			char history_name[] = ".planck_history";
 			int len = strlen(home) + strlen(history_name) + 2;
 			history_path = malloc(len * sizeof(char));
 			snprintf(history_path, len, "%s/%s", home, history_name);

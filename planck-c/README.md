@@ -9,7 +9,7 @@ platforms.
 
 - install `javascriptcoregtk`, `libzip`, `zlib`
 - `make bundle-and-build`
-- have fun: `./ton`
+- have fun: `./planck`
 
 ## Implementation
 

@@ -1,4 +1,4 @@
-.PHONY: build bundle-and-build release bundle-test zip-test planck clean
+.PHONY: build bundle-and-build release bundle-test zip-test clean
 
 VERSION = $(shell git describe --tags)
 
@@ -11,22 +11,22 @@ LIBFLAGS = $(shell pkg-config --libs $(DEPS))
 SOURCES = $(sort $(wildcard *.c) linenoise.c)
 OBJECTS = $(SOURCES:.c=.o)
 
-# Build only ton
-build: ton
+# Build only the binary
+build: planck
 
 # Bundle cljs dependencies and build with that
-bundle-and-build: planck
-	cd planck; ./script/build-c
+bundle-and-build:
+	cd ..; ./script/build-c
 
 # Build release tarball
 release:
-	git archive --prefix=ton-$(VERSION)/ --output=ton-$(VERSION).tar HEAD
+	git archive --prefix=planck-$(VERSION)/ --output=planck-$(VERSION).tar HEAD
 	# add bundle.c (with deps) and linenoise
-	tar -uf ton-$(VERSION).tar --transform='s/^/ton-$(VERSION)\//' bundle.c linenoise.c linenoise.h
-	gzip --force ton-$(VERSION).tar
+	tar -uf planck-$(VERSION).tar --transform='s/^/planck-$(VERSION)\//' bundle.c linenoise.c linenoise.h
+	gzip --force planck-$(VERSION).tar
 
 
-ton: $(OBJECTS)
+planck: $(OBJECTS)
 	$(CC) $(LIBFLAGS) $(OBJECTS) -o $@
 
 linenoise.c: linenoise.h
@@ -35,11 +35,6 @@ linenoise.c: linenoise.h
 linenoise.h:
 	curl -LsSfo $@ https://github.com/antirez/linenoise/raw/master/linenoise.h
 
-planck:
-	if [ ! -d planck ]; then git clone https://github.com/mfikes/planck; fi
-	cp script/bundle-c planck/planck-cljs/script/bundle-c
-	cp script/build-c planck/script/build-c
-
 bundle-test:
 	$(CC) -lz -DBUNDLE_TEST bundle.c -o $@
 
@@ -47,7 +42,7 @@ zip-test:
 	$(CC) $(shell pkg-config --cflags --libs libzip) -DZIP_TEST zip.c -o $@
 
 clean:
-	rm -f ton bundle-test zip-test $(OBJECTS)
+	rm -f planck bundle-test zip-test $(OBJECTS)
 
 jsc-funcs:
 	grep -Rh JS_EXPORT /usr/include/webkitgtk-4.0/JavaScriptCore | sed 's/^JS_EXPORT //' | grep -v '^#' > $@
