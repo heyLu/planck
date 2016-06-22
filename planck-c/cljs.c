@@ -385,12 +385,17 @@ void *cljs_do_engine_init(void *data) {
 }
 
 void cljs_engine_init(JSContextRef ctx) {
+#ifdef HAVE_JAVASCRIPTCOREGTK_3
 	sigset_t set;
 	sigemptyset(&set);
 	// FIXME: Figure out where SIGUSR2 comes from
 	//   (Without blocking SIGUSR2 things mysteriously don't work)
+	//
+	//   Might be related to this feature in JSC:
+	//   https://bugs.webkit.org/show_bug.cgi?id=26838
 	sigaddset(&set, SIGUSR2);
 	pthread_sigmask(SIG_BLOCK, &set, NULL);
+#endif
 
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);

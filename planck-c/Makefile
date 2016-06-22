@@ -10,6 +10,9 @@ ifeq ($(UNAME_S),Linux)
 	JSCDEP = $(shell pkg-config --exists javascriptcoregtk-4.0 && echo "javascriptcoregtk-4.0" || echo "javascriptcoregtk-3.0")
 	DEPS = $(JSCDEP) libzip libcurl
 	CFLAGS += -pthread $(shell pkg-config --cflags $(DEPS))
+	ifeq ($(strip $(JSCDEP)),javascriptcoregtk-3.0)
+		CFLAGS += -DHAVE_JAVASCRIPTCOREGTK_3
+	endif
 	LIBFLAGS = $(shell pkg-config --libs $(DEPS))
 endif
 ifeq ($(UNAME_S),Darwin)
